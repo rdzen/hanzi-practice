@@ -11,8 +11,9 @@
             text-align: center;
             padding: 20px;
             background: #f5f5f5;
+            margin: 0;
         }
-        h1 { color: #d32f2f; }
+        h1 { color: #d32f2f; font-size: 28px; }
         #character-target {
             margin: 20px auto;
             width: 300px;
@@ -22,30 +23,47 @@
             border-radius: 10px;
         }
         button {
-            padding: 10px 20px;
+            padding: 12px 24px;
             margin: 5px;
             font-size: 16px;
             background: #d32f2f;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
         }
+        button:active { background: #b71c1c; }
         #info {
             margin-top: 20px;
             font-size: 18px;
         }
+        #info span { color: #d32f2f; font-weight: bold; }
         #char-list {
             margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .char-btn {
-            padding: 15px;
-            font-size: 24px;
-            min-width: 60px;
+            padding: 12px;
+            font-size: 20px;
+            min-width: 50px;
+            background: #fff;
+            color: #333;
+            border: 2px solid #d32f2f;
+        }
+        .char-btn.active {
+            background: #d32f2f;
+            color: white;
+        }
+        #progress {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
@@ -57,35 +75,47 @@
         <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
         <p><b>Перевод:</b> <span id="meaning">-</span></p>
     </div>
-    <button onclick="animateCharacter()">▶ Показать анимацию</button>
-    <button onclick="quizCharacter()">️ Проверить меня</button>
+    <div id="progress">Иероглиф <span id="current-num">1</span> из <span id="total-num">20</span></div>
+    <button onclick="animateCharacter()">▶ Анимация</button>
+    <button onclick="quizCharacter()">✏️ Проверить</button>
     <button onclick="nextCharacter()">➡️ Следующий</button>
     
     <div id="char-list"></div>
 
     <script>
-        let writer;
-        let characters = [];
-        let currentIndex = 0;
+        // Данные встроены прямо в HTML — никаких внешних файлов!
+        const characters = [
+            { "character": "一", "pinyin": "yī", "meaning": "один" },
+            { "character": "二", "pinyin": "èr", "meaning": "два" },
+            { "character": "三", "pinyin": "sān", "meaning": "три" },
+            { "character": "四", "pinyin": "sì", "meaning": "четыре" },
+            { "character": "五", "pinyin": "wǔ", "meaning": "пять" },
+            { "character": "六", "pinyin": "liù", "meaning": "шесть" },
+            { "character": "七", "pinyin": "qī", "meaning": "семь" },
+            { "character": "八", "pinyin": "bā", "meaning": "восемь" },
+            { "character": "九", "pinyin": "jiǔ", "meaning": "девять" },
+            { "character": "十", "pinyin": "shí", "meaning": "десять" },
+            { "character": "人", "pinyin": "rén", "meaning": "человек" },
+            { "character": "大", "pinyin": "dà", "meaning": "большой" },
+            { "character": "小", "pinyin": "xiǎo", "meaning": "маленький" },
+            { "character": "中", "pinyin": "zhōng", "meaning": "середина, Китай" },
+            { "character": "国", "pinyin": "guó", "meaning": "страна" },
+            { "character": "学", "pinyin": "xué", "meaning": "учиться" },
+            { "character": "生", "pinyin": "shēng", "meaning": "жизнь, студент" },
+            { "character": "老", "pinyin": "lǎo", "meaning": "старый" },
+            { "character": "师", "pinyin": "shī", "meaning": "учитель" },
+            { "character": "好", "pinyin": "hǎo", "meaning": "хороший" }
+        ];
 
-        // Загружаем данные из JSON файла
-        fetch('hsk-data.json')
-            .then(response => response.json())
-            .then(data => {
-                characters = data;
-                displayCharacterList();
-                loadCharacter(0);
-            })
-            .catch(error => {
-                console.error('Ошибка загрузки данных:', error);
-                document.getElementById('info').innerHTML = '<p style="color:red;">Ошибка загрузки данных. Проверь файл hsk-data.json</p>';
-            });
+        let writer;
+        let currentIndex = 0;
 
         function displayCharacterList() {
             const list = document.getElementById('char-list');
+            list.innerHTML = '';
             characters.forEach((char, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'char-btn';
+                btn.className = 'char-btn' + (index === currentIndex ? ' active' : '');
                 btn.textContent = char.character;
                 btn.onclick = () => loadCharacter(index);
                 list.appendChild(btn);
@@ -100,6 +130,10 @@
             document.getElementById('char').textContent = char.character;
             document.getElementById('pinyin').textContent = char.pinyin;
             document.getElementById('meaning').textContent = char.meaning;
+            document.getElementById('current-num').textContent = index + 1;
+            document.getElementById('total-num').textContent = characters.length;
+            
+            displayCharacterList();
             
             writer = HanziWriter.create('character-target', char.character, {
                 width: 300,
@@ -130,11 +164,14 @@
                         console.log('Ошибка!');
                     },
                     onComplete: function(summaryData) {
-                        alert('Отлично! Иероглиф написан правильно! ');
+                        alert('Отлично! Иероглиф написан правильно! 🎉');
                     }
                 });
             }
         }
+
+        // Запуск при загрузке страницы
+        loadCharacter(0);
     </script>
 </body>
 </html>
