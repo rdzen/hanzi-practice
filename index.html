@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Учим иероглифы HSK 1-3</title>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="data.js"></script>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -187,7 +188,7 @@
     </style>
 </head>
 <body>
-    <h1>🀄 Учим иероглифы HSK</h1>
+    <h1> Учим иероглифы HSK</h1>
     
     <div id="stats">
         <div class="stat-item">
@@ -196,7 +197,7 @@
         </div>
         <div class="stat-item">
             <div class="stat-value" id="streak">0</div>
-            <div class="stat-label">🔥 Серия</div>
+            <div class="stat-label"> Серия</div>
         </div>
         <div class="stat-item">
             <div class="stat-value" id="days">0</div>
@@ -219,23 +220,21 @@
         <input type="text" id="search-input" placeholder=" Поиск по иероглифу, пиньиню или переводу..." oninput="handleSearch()">
     </div>
     
-    <div id="loading">Загрузка данных...</div>
+    <div id="character-target"></div>
+    <div id="quiz-hint">Нажми "✏️ Проверить" чтобы начать рисование</div>
     
-    <div id="character-target" style="display:none;"></div>
-    <div id="quiz-hint" style="display:none;">Нажми "✏️ Проверить" чтобы начать рисование</div>
-    
-    <div id="info" style="display:none;">
+    <div id="info">
         <p><b>Иероглиф:</b> <span id="char">-</span></p>
         <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
         <p><b>Перевод:</b> <span id="meaning">-</span></p>
     </div>
     
-    <div id="mnemonic" style="display:none;">
+    <div id="mnemonic">
         <div id="mnemonic-icon"></div>
         <div id="mnemonic-text">Загрузка...</div>
     </div>
     
-    <div id="controls" style="display:none;">
+    <div id="controls">
         <button onclick="animateCharacter()">▶ Анимация</button>
         <button onclick="quizCharacter()">✏️ Проверить</button>
         <button onclick="nextCharacter()">➡️ Следующий</button>
@@ -243,8 +242,8 @@
     
     <div id="char-list"></div>
     
-    <div id="pagination" style="display:none;">
-        <button onclick="prevPage()">◀ Назад</button>
+    <div id="pagination">
+        <button onclick="prevPage()"> Назад</button>
         <span id="page-info">Страница 1</span>
         <button onclick="nextPage()">Вперед ▶</button>
     </div>
@@ -252,7 +251,7 @@
     <div id="bonus-popup"></div>
 
     <script>
-        let allData = { hsk1: [], hsk2: [], hsk3: [] };
+        // Переменные состояния
         let writer;
         let currentIndex = 0;
         let currentLevel = 1;
@@ -269,30 +268,7 @@
             learned: {}
         };
 
-        // Загрузка данных из JSON
-        fetch('hsk-data.json')
-            .then(response => response.json())
-            .then(data => {
-                allData = data;
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('character-target').style.display = 'block';
-                document.getElementById('quiz-hint').style.display = 'block';
-                document.getElementById('info').style.display = 'block';
-                document.getElementById('mnemonic').style.display = 'block';
-                document.getElementById('controls').style.display = 'block';
-                document.getElementById('pagination').style.display = 'flex';
-                
-                loadGameState();
-                applyFilters();
-                if (filteredCharacters.length > 0) {
-                    loadCharacter(0);
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка загрузки данных:', error);
-                document.getElementById('loading').innerHTML = '<p style="color:red;">Ошибка загрузки данных. Проверь файл hsk-data.json</p>';
-            });
-
+        // Загрузка сохраненного прогресса
         function loadGameState() {
             const saved = localStorage.getItem('hanziGameState');
             if (saved) {
@@ -482,7 +458,7 @@
                         document.getElementById('quiz-hint').style.color = '#f44336';
                     },
                     onComplete: function() {
-                        document.getElementById('quiz-hint').textContent = '🎉 Отлично! Иероглиф написан правильно!';
+                        document.getElementById('quiz-hint').textContent = ' Отлично! Иероглиф написан правильно!';
                         document.getElementById('quiz-hint').style.color = '#4caf50';
                         
                         const char = filteredCharacters[currentIndex];
@@ -515,6 +491,13 @@
                     }
                 });
             }
+        }
+
+        // Запуск при загрузке страницы
+        loadGameState();
+        applyFilters();
+        if (filteredCharacters.length > 0) {
+            loadCharacter(0);
         }
     </script>
 </body>
