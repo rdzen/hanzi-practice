@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Учим иероглифы</title>
+    <title>Учим иероглифы HSK</title>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     <style>
         body {
@@ -35,47 +35,84 @@
             margin-top: 20px;
             font-size: 18px;
         }
+        #char-list {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .char-btn {
+            padding: 15px;
+            font-size: 24px;
+            min-width: 60px;
+        }
     </style>
 </head>
 <body>
-    <h1>🀄 Учим иероглифы</h1>
+    <h1>🀄 Учим иероглифы HSK</h1>
     <div id="character-target"></div>
     <div id="info">
-        <p><b>Иероглиф:</b> <span id="char">一</span></p>
-        <p><b>Пиньинь:</b> <span id="pinyin">yī</span></p>
-        <p><b>Перевод:</b> <span id="meaning">один</span></p>
+        <p><b>Иероглиф:</b> <span id="char">-</span></p>
+        <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
+        <p><b>Перевод:</b> <span id="meaning">-</span></p>
     </div>
-    <button onclick="loadCharacter('一')">一 (один)</button>
-    <button onclick="loadCharacter('二')">二 (два)</button>
-    <button onclick="loadCharacter('三')">三 (три)</button>
-    <button onclick="loadCharacter('人')">人 (человек)</button>
-    <button onclick="loadCharacter('大')">大 (большой)</button>
     <button onclick="animateCharacter()">▶ Показать анимацию</button>
-    <button onclick="quizCharacter()">✏️ Проверить меня</button>
+    <button onclick="quizCharacter()">️ Проверить меня</button>
+    <button onclick="nextCharacter()">➡️ Следующий</button>
+    
+    <div id="char-list"></div>
 
     <script>
         let writer;
-        const characters = {
-            '一': { pinyin: 'yī', meaning: 'один' },
-            '二': { pinyin: 'èr', meaning: 'два' },
-            '三': { pinyin: 'sān', meaning: 'три' },
-            '人': { pinyin: 'rén', meaning: 'человек' },
-            '大': { pinyin: 'dà', meaning: 'большой' }
-        };
+        let characters = [];
+        let currentIndex = 0;
 
-        function loadCharacter(char) {
-            document.getElementById('character-target').innerHTML = '';
-            document.getElementById('char').textContent = char;
-            document.getElementById('pinyin').textContent = characters[char].pinyin;
-            document.getElementById('meaning').textContent = characters[char].meaning;
+        // Загружаем данные из JSON файла
+        fetch('hsk-data.json')
+            .then(response => response.json())
+            .then(data => {
+                characters = data;
+                displayCharacterList();
+                loadCharacter(0);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных:', error);
+                document.getElementById('info').innerHTML = '<p style="color:red;">Ошибка загрузки данных. Проверь файл hsk-data.json</p>';
+            });
+
+        function displayCharacterList() {
+            const list = document.getElementById('char-list');
+            characters.forEach((char, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'char-btn';
+                btn.textContent = char.character;
+                btn.onclick = () => loadCharacter(index);
+                list.appendChild(btn);
+            });
+        }
+
+        function loadCharacter(index) {
+            currentIndex = index;
+            const char = characters[index];
             
-            writer = HanziWriter.create('character-target', char, {
+            document.getElementById('character-target').innerHTML = '';
+            document.getElementById('char').textContent = char.character;
+            document.getElementById('pinyin').textContent = char.pinyin;
+            document.getElementById('meaning').textContent = char.meaning;
+            
+            writer = HanziWriter.create('character-target', char.character, {
                 width: 300,
                 height: 300,
                 padding: 20,
                 showOutline: true,
                 showCharacter: false
             });
+        }
+
+        function nextCharacter() {
+            currentIndex = (currentIndex + 1) % characters.length;
+            loadCharacter(currentIndex);
         }
 
         function animateCharacter() {
@@ -93,13 +130,11 @@
                         console.log('Ошибка!');
                     },
                     onComplete: function(summaryData) {
-                        alert('Отлично! Иероглиф написан правильно! 🎉');
+                        alert('Отлично! Иероглиф написан правильно! ');
                     }
                 });
             }
         }
-
-        loadCharacter('一');
     </script>
 </body>
 </html>
