@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Учим иероглифы</title>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #d32f2f; }
+        #character-target {
+            margin: 20px auto;
+            width: 300px;
+            height: 300px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            background: #d32f2f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🀄 Учим иероглифы</h1>
+    <div id="character-target"></div>
+    <div id="info">
+        <p><b>Иероглиф:</b> <span id="char">一</span></p>
+        <p><b>Пиньинь:</b> <span id="pinyin">yī</span></p>
+        <p><b>Перевод:</b> <span id="meaning">один</span></p>
+    </div>
+    <button onclick="loadCharacter('一')">一 (один)</button>
+    <button onclick="loadCharacter('二')">二 (два)</button>
+    <button onclick="loadCharacter('三')">三 (три)</button>
+    <button onclick="loadCharacter('人')">人 (человек)</button>
+    <button onclick="loadCharacter('大')">大 (большой)</button>
+    <button onclick="animateCharacter()">▶ Показать анимацию</button>
+    <button onclick="quizCharacter()">✏️ Проверить меня</button>
+
+    <script>
+        let writer;
+        const characters = {
+            '一': { pinyin: 'yī', meaning: 'один' },
+            '二': { pinyin: 'èr', meaning: 'два' },
+            '三': { pinyin: 'sān', meaning: 'три' },
+            '人': { pinyin: 'rén', meaning: 'человек' },
+            '大': { pinyin: 'dà', meaning: 'большой' }
+        };
+
+        function loadCharacter(char) {
+            document.getElementById('character-target').innerHTML = '';
+            document.getElementById('char').textContent = char;
+            document.getElementById('pinyin').textContent = characters[char].pinyin;
+            document.getElementById('meaning').textContent = characters[char].meaning;
+            
+            writer = HanziWriter.create('character-target', char, {
+                width: 300,
+                height: 300,
+                padding: 20,
+                showOutline: true,
+                showCharacter: false
+            });
+        }
+
+        function animateCharacter() {
+            if (writer) writer.animateCharacter();
+        }
+
+        function quizCharacter() {
+            if (writer) {
+                writer.quiz({
+                    showOutline: true,
+                    onCorrectStroke: function(strokeData) {
+                        console.log('Правильная черта!');
+                    },
+                    onMistake: function(strokeData) {
+                        console.log('Ошибка!');
+                    },
+                    onComplete: function(summaryData) {
+                        alert('Отлично! Иероглиф написан правильно! 🎉');
+                    }
+                });
+            }
+        }
+
+        loadCharacter('一');
+    </script>
+</body>
+</html>
