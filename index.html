@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Учим иероглифы HSK</title>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     <style>
@@ -12,6 +12,7 @@
             padding: 20px;
             background: #f5f5f5;
             margin: 0;
+            touch-action: manipulation;
         }
         h1 { color: #d32f2f; font-size: 28px; }
         #character-target {
@@ -21,6 +22,9 @@
             background: white;
             border: 2px solid #333;
             border-radius: 10px;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
         button {
             padding: 12px 24px;
@@ -31,6 +35,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            touch-action: manipulation;
         }
         button:active { background: #b71c1c; }
         #info {
@@ -65,11 +70,18 @@
             font-size: 14px;
             color: #666;
         }
+        #quiz-hint {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <h1>🀄 Учим иероглифы HSK</h1>
     <div id="character-target"></div>
+    <div id="quiz-hint">Нажми "✏️ Проверить" чтобы начать рисование</div>
     <div id="info">
         <p><b>Иероглиф:</b> <span id="char">-</span></p>
         <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
@@ -83,7 +95,6 @@
     <div id="char-list"></div>
 
     <script>
-        // Данные встроены прямо в HTML — никаких внешних файлов!
         const characters = [
             { "character": "一", "pinyin": "yī", "meaning": "один" },
             { "character": "二", "pinyin": "èr", "meaning": "два" },
@@ -109,6 +120,7 @@
 
         let writer;
         let currentIndex = 0;
+        let isQuizMode = false;
 
         function displayCharacterList() {
             const list = document.getElementById('char-list');
@@ -125,6 +137,7 @@
         function loadCharacter(index) {
             currentIndex = index;
             const char = characters[index];
+            isQuizMode = false;
             
             document.getElementById('character-target').innerHTML = '';
             document.getElementById('char').textContent = char.character;
@@ -132,6 +145,7 @@
             document.getElementById('meaning').textContent = char.meaning;
             document.getElementById('current-num').textContent = index + 1;
             document.getElementById('total-num').textContent = characters.length;
+            document.getElementById('quiz-hint').textContent = 'Нажми "✏️ Проверить" чтобы начать рисование';
             
             displayCharacterList();
             
@@ -140,7 +154,9 @@
                 height: 300,
                 padding: 20,
                 showOutline: true,
-                showCharacter: false
+                showCharacter: false,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 200
             });
         }
 
@@ -150,27 +166,38 @@
         }
 
         function animateCharacter() {
-            if (writer) writer.animateCharacter();
+            if (writer) {
+                isQuizMode = false;
+                document.getElementById('quiz-hint').textContent = 'Смотри анимацию...';
+                writer.animateCharacter();
+            }
         }
 
         function quizCharacter() {
             if (writer) {
+                isQuizMode = true;
+                document.getElementById('quiz-hint').textContent = '✏️ Рисуй пальцем в квадрате!';
                 writer.quiz({
                     showOutline: true,
+                    showHintAfterMisses: 2,
+                    highlightOnComplete: true,
                     onCorrectStroke: function(strokeData) {
-                        console.log('Правильная черта!');
+                        document.getElementById('quiz-hint').textContent = '✓ Правильно! Продолжай...';
+                        document.getElementById('quiz-hint').style.color = '#4caf50';
                     },
                     onMistake: function(strokeData) {
-                        console.log('Ошибка!');
+                        document.getElementById('quiz-hint').textContent = '✗ Попробуй еще раз!';
+                        document.getElementById('quiz-hint').style.color = '#f44336';
                     },
                     onComplete: function(summaryData) {
+                        document.getElementById('quiz-hint').textContent = '🎉 Отлично! Иероглиф написан правильно!';
+                        document.getElementById('quiz-hint').style.color = '#4caf50';
                         alert('Отлично! Иероглиф написан правильно! 🎉');
                     }
                 });
             }
         }
 
-        // Запуск при загрузке страницы
         loadCharacter(0);
     </script>
 </body>
