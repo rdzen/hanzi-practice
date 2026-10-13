@@ -17,7 +17,6 @@
         }
         h1 { color: #d32f2f; font-size: 22px; margin: 10px 0; }
         
-        /* Статистика */
         #stats {
             background: white;
             border-radius: 10px;
@@ -32,7 +31,6 @@
         .stat-value { font-size: 18px; font-weight: bold; color: #d32f2f; }
         .stat-label { font-size: 11px; color: #666; }
         
-        /* Прогресс */
         #progress-bar-container {
             max-width: 400px;
             margin: 10px auto;
@@ -53,7 +51,6 @@
             margin-top: 5px;
         }
         
-        /* Вкладки уровней */
         #level-tabs {
             max-width: 400px;
             margin: 15px auto;
@@ -75,7 +72,6 @@
             color: white;
         }
         
-        /* Поиск */
         #search-container {
             max-width: 400px;
             margin: 10px auto;
@@ -88,7 +84,6 @@
             font-size: 14px;
         }
         
-        /* Поле рисования */
         #character-target {
             margin: 15px auto;
             width: 280px;
@@ -101,7 +96,6 @@
             user-select: none;
         }
         
-        /* Мнемоника */
         #mnemonic {
             background: #fff9c4;
             border-left: 4px solid #fbc02d;
@@ -114,11 +108,9 @@
         #mnemonic-icon { font-size: 28px; text-align: center; }
         #mnemonic-text { font-size: 13px; color: #333; margin-top: 5px; }
         
-        /* Информация */
         #info { margin: 10px 0; font-size: 15px; }
         #info span { color: #d32f2f; font-weight: bold; }
         
-        /* Кнопки */
         button {
             padding: 10px 18px;
             margin: 5px;
@@ -132,7 +124,6 @@
         }
         button:active { background: #b71c1c; }
         
-        /* Подсказка */
         #quiz-hint {
             margin: 10px 0;
             font-size: 13px;
@@ -140,7 +131,6 @@
             min-height: 20px;
         }
         
-        /* Список иероглифов с пагинацией */
         #char-list {
             margin-top: 15px;
             display: flex;
@@ -163,7 +153,6 @@
         .char-btn.active { background: #d32f2f; color: white; }
         .char-btn.learned { background: #c8e6c9; border-color: #4caf50; }
         
-        /* Пагинация */
         #pagination {
             margin-top: 15px;
             display: flex;
@@ -173,7 +162,6 @@
         }
         #page-info { font-size: 14px; color: #666; }
         
-        /* Бонус */
         #bonus-popup {
             position: fixed;
             top: 50%;
@@ -189,12 +177,18 @@
             display: none;
             z-index: 1000;
         }
+        
+        #loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 16px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
-    <h1> Учим иероглифы HSK</h1>
+    <h1>🀄 Учим иероглифы HSK</h1>
     
-    <!-- Статистика -->
     <div id="stats">
         <div class="stat-item">
             <div class="stat-value" id="score">0</div>
@@ -210,74 +204,318 @@
         </div>
     </div>
     
-    <!-- Прогресс -->
     <div id="progress-bar-container">
         <div id="progress-bar"></div>
     </div>
     <div id="progress-text">Пройдено: <span id="learned-count">0</span> из <span id="total-count">0</span></div>
     
-    <!-- Вкладки уровней -->
     <div id="level-tabs">
         <div class="level-tab active" onclick="switchLevel(1)">HSK 1</div>
         <div class="level-tab" onclick="switchLevel(2)">HSK 2</div>
         <div class="level-tab" onclick="switchLevel(3)">HSK 3</div>
     </div>
     
-    <!-- Поиск -->
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="🔍 Поиск по иероглифу, пиньиню или переводу..." oninput="handleSearch()">
+        <input type="text" id="search-input" placeholder=" Поиск по иероглифу, пиньиню или переводу..." oninput="handleSearch()">
     </div>
     
-    <!-- Поле рисования -->
-    <div id="character-target"></div>
-    <div id="quiz-hint">Нажми "✏️ Проверить" чтобы начать рисование</div>
+    <div id="loading">Загрузка данных...</div>
     
-    <!-- Информация -->
-    <div id="info">
+    <div id="character-target" style="display:none;"></div>
+    <div id="quiz-hint" style="display:none;">Нажми "✏️ Проверить" чтобы начать рисование</div>
+    
+    <div id="info" style="display:none;">
         <p><b>Иероглиф:</b> <span id="char">-</span></p>
         <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
         <p><b>Перевод:</b> <span id="meaning">-</span></p>
     </div>
     
-    <!-- Мнемоника -->
-    <div id="mnemonic">
+    <div id="mnemonic" style="display:none;">
         <div id="mnemonic-icon"></div>
         <div id="mnemonic-text">Загрузка...</div>
     </div>
     
-    <!-- Кнопки -->
-    <button onclick="animateCharacter()">▶ Анимация</button>
-    <button onclick="quizCharacter()">✏️ Проверить</button>
-    <button onclick="nextCharacter()">➡️ Следующий</button>
+    <div id="controls" style="display:none;">
+        <button onclick="animateCharacter()">▶ Анимация</button>
+        <button onclick="quizCharacter()">✏️ Проверить</button>
+        <button onclick="nextCharacter()">➡️ Следующий</button>
+    </div>
     
-    <!-- Список иероглифов -->
     <div id="char-list"></div>
     
-    <!-- Пагинация -->
-    <div id="pagination">
-        <button onclick="prevPage()"> Назад</button>
+    <div id="pagination" style="display:none;">
+        <button onclick="prevPage()">◀ Назад</button>
         <span id="page-info">Страница 1</span>
         <button onclick="nextPage()">Вперед ▶</button>
     </div>
     
-    <!-- Бонус -->
     <div id="bonus-popup"></div>
 
     <script>
-        // === БАЗА ДАННЫХ ИЕРОГЛИФОВ HSK 1 (150 штук) ===
-        const hsk1 = [
-            { "character": "一", "pinyin": "yī", "meaning": "один", "icon": "📏", "mnemonic": "Одна горизонтальная черта — как палка-единичка" },
-            { "character": "二", "pinyin": "èr", "meaning": "два", "icon": "️", "mnemonic": "Две палочки — как два пальца" },
-            { "character": "三", "pinyin": "sān", "meaning": "три", "icon": "☰", "mnemonic": "Три палочки — как три ступеньки" },
-            { "character": "四", "pinyin": "sì", "meaning": "четыре", "icon": "🔲", "mnemonic": "Коробочка с ножками внутри — как четыре стены комнаты" },
-            { "character": "五", "pinyin": "wǔ", "meaning": "пять", "icon": "🖐️", "mnemonic": "Похоже на песочные часы — пять пальцев на руке" },
-            { "character": "六", "pinyin": "liù", "meaning": "шесть", "icon": "🏠", "mnemonic": "Крыша дома с двумя точками — шесть окон" },
-            { "character": "七", "pinyin": "qī", "meaning": "семь", "icon": "✂️", "mnemonic": "Похоже на ножницы — семь раз отмерь" },
-            { "character": "八", "pinyin": "bā", "meaning": "восемь", "icon": "🕷️", "mnemonic": "Две ножки, расходящиеся в стороны — как у паука (8 лап)" },
-            { "character": "九", "pinyin": "jiǔ", "meaning": "девять", "icon": "9️⃣", "mnemonic": "Изогнутая линия — как горка, девять скатываний" },
-            { "character": "十", "pinyin": "shí", "meaning": "десять", "icon": "➕", "mnemonic": "Плюс — крест из двух палочек, идеальная десятка" },
-            { "character": "人", "pinyin": "rén", "meaning": "человек", "icon": "🚶", "mnemonic": "Две ножки идут — это человек в движении" },
-            { "character": "大", "pinyin": "dà", "meaning": "большой", "icon": "💪", "mnemonic": "Человек (人) раскинул руки в стороны — большой!" },
-            { "character": "小", "pinyin": "xiǎo", "meaning": "маленький", "icon": "", "mnemonic": "Центральная палочка с двумя маленькими штрихами по бокам — кроха" },
-            { "character": "中", "pinyin": "zhōng", "meaning": "середина, Китай", "icon": "🎯", "mnemonic": "Прямоугольник с палкой посередине — стрела в цель, центр" },
-            { "character": "国", "pinyin": "guó", "meaning": "страна", "icon": "🏯", "mnemonic
+        let allData = { hsk1: [], hsk2: [], hsk3: [] };
+        let writer;
+        let currentIndex = 0;
+        let currentLevel = 1;
+        let filteredCharacters = [];
+        let currentPage = 0;
+        const ITEMS_PER_PAGE = 30;
+        let currentStreak = 0;
+        let searchQuery = '';
+
+        let gameState = {
+            score: 0,
+            daysStreak: 0,
+            lastStudyDate: null,
+            learned: {}
+        };
+
+        // Загрузка данных из JSON
+        fetch('hsk-data.json')
+            .then(response => response.json())
+            .then(data => {
+                allData = data;
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('character-target').style.display = 'block';
+                document.getElementById('quiz-hint').style.display = 'block';
+                document.getElementById('info').style.display = 'block';
+                document.getElementById('mnemonic').style.display = 'block';
+                document.getElementById('controls').style.display = 'block';
+                document.getElementById('pagination').style.display = 'flex';
+                
+                loadGameState();
+                applyFilters();
+                if (filteredCharacters.length > 0) {
+                    loadCharacter(0);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки данных:', error);
+                document.getElementById('loading').innerHTML = '<p style="color:red;">Ошибка загрузки данных. Проверь файл hsk-data.json</p>';
+            });
+
+        function loadGameState() {
+            const saved = localStorage.getItem('hanziGameState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+            const today = new Date().toDateString();
+            if (gameState.lastStudyDate) {
+                const lastDate = new Date(gameState.lastStudyDate);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                if (gameState.lastStudyDate !== today) {
+                    if (lastDate.toDateString() !== yesterday.toDateString()) {
+                        gameState.daysStreak = 0;
+                    }
+                }
+            }
+            updateStats();
+        }
+
+        function saveGameState() {
+            localStorage.setItem('hanziGameState', JSON.stringify(gameState));
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak').textContent = currentStreak;
+            document.getElementById('days').textContent = gameState.daysStreak;
+            const learnedCount = Object.keys(gameState.learned).length;
+            const totalCount = allData.hsk1.length + allData.hsk2.length + allData.hsk3.length;
+            document.getElementById('learned-count').textContent = learnedCount;
+            document.getElementById('total-count').textContent = totalCount;
+            const progress = totalCount > 0 ? (learnedCount / totalCount) * 100 : 0;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function showBonusPopup(text) {
+            const popup = document.getElementById('bonus-popup');
+            popup.textContent = text;
+            popup.style.display = 'block';
+            setTimeout(() => { popup.style.display = 'none'; }, 1500);
+        }
+
+        function switchLevel(level) {
+            currentLevel = level;
+            currentPage = 0;
+            searchQuery = '';
+            document.getElementById('search-input').value = '';
+            
+            document.querySelectorAll('.level-tab').forEach((tab, index) => {
+                tab.classList.toggle('active', index + 1 === level);
+            });
+            
+            applyFilters();
+            if (filteredCharacters.length > 0) {
+                loadCharacter(0);
+            }
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('search-input').value.toLowerCase();
+            currentPage = 0;
+            applyFilters();
+            if (filteredCharacters.length > 0) {
+                loadCharacter(0);
+            }
+        }
+
+        function applyFilters() {
+            const levelKey = 'hsk' + currentLevel;
+            const levelChars = allData[levelKey] || [];
+            
+            if (!searchQuery) {
+                filteredCharacters = levelChars;
+            } else {
+                filteredCharacters = levelChars.filter(char => 
+                    char.character.includes(searchQuery) ||
+                    char.pinyin.toLowerCase().includes(searchQuery) ||
+                    char.meaning.toLowerCase().includes(searchQuery)
+                );
+            }
+            displayCharacterList();
+            updatePagination();
+        }
+
+        function displayCharacterList() {
+            const list = document.getElementById('char-list');
+            list.innerHTML = '';
+            
+            const start = currentPage * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageChars = filteredCharacters.slice(start, end);
+            
+            pageChars.forEach((char, index) => {
+                const globalIndex = start + index;
+                const btn = document.createElement('button');
+                let className = 'char-btn';
+                if (globalIndex === currentIndex) className += ' active';
+                if (gameState.learned[char.character]) className += ' learned';
+                btn.className = className;
+                btn.textContent = char.character;
+                btn.onclick = () => loadCharacter(globalIndex);
+                list.appendChild(btn);
+            });
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredCharacters.length / ITEMS_PER_PAGE);
+            document.getElementById('page-info').textContent = `Страница ${currentPage + 1} из ${totalPages || 1}`;
+        }
+
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayCharacterList();
+                updatePagination();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredCharacters.length / ITEMS_PER_PAGE);
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                displayCharacterList();
+                updatePagination();
+            }
+        }
+
+        function loadCharacter(index) {
+            if (index >= filteredCharacters.length) return;
+            currentIndex = index;
+            const char = filteredCharacters[index];
+            
+            document.getElementById('character-target').innerHTML = '';
+            document.getElementById('char').textContent = char.character;
+            document.getElementById('pinyin').textContent = char.pinyin;
+            document.getElementById('meaning').textContent = char.meaning;
+            document.getElementById('quiz-hint').textContent = 'Нажми "✏️ Проверить" чтобы начать рисование';
+            document.getElementById('quiz-hint').style.color = '#666';
+            
+            document.getElementById('mnemonic-icon').textContent = char.icon || '';
+            document.getElementById('mnemonic-text').textContent = char.mnemonic || 'Мнемоника не добавлена';
+            
+            displayCharacterList();
+            
+            writer = HanziWriter.create('character-target', char.character, {
+                width: 280,
+                height: 280,
+                padding: 20,
+                showOutline: true,
+                showCharacter: false,
+                strokeAnimationSpeed: 1,
+                delayBetweenStrokes: 200
+            });
+        }
+
+        function nextCharacter() {
+            if (currentIndex < filteredCharacters.length - 1) {
+                loadCharacter(currentIndex + 1);
+            } else {
+                alert('Это последний иероглиф в списке!');
+            }
+        }
+
+        function animateCharacter() {
+            if (writer) {
+                document.getElementById('quiz-hint').textContent = 'Смотри анимацию...';
+                document.getElementById('quiz-hint').style.color = '#666';
+                writer.animateCharacter();
+            }
+        }
+
+        function quizCharacter() {
+            if (writer) {
+                document.getElementById('quiz-hint').textContent = '✏️ Рисуй пальцем в квадрате!';
+                document.getElementById('quiz-hint').style.color = '#1976d2';
+                
+                writer.quiz({
+                    showOutline: true,
+                    showHintAfterMisses: 2,
+                    highlightOnComplete: true,
+                    onCorrectStroke: function() {
+                        document.getElementById('quiz-hint').textContent = '✓ Правильная черта!';
+                        document.getElementById('quiz-hint').style.color = '#4caf50';
+                    },
+                    onMistake: function() {
+                        document.getElementById('quiz-hint').textContent = '✗ Попробуй еще раз!';
+                        document.getElementById('quiz-hint').style.color = '#f44336';
+                    },
+                    onComplete: function() {
+                        document.getElementById('quiz-hint').textContent = '🎉 Отлично! Иероглиф написан правильно!';
+                        document.getElementById('quiz-hint').style.color = '#4caf50';
+                        
+                        const char = filteredCharacters[currentIndex];
+                        
+                        gameState.score += 10;
+                        currentStreak++;
+                        
+                        if (currentStreak > 0 && currentStreak % 3 === 0) {
+                            gameState.score += 5;
+                            showBonusPopup('🔥 БОНУС +5 за серию ' + currentStreak + '!');
+                        }
+                        
+                        gameState.learned[char.character] = true;
+                        
+                        const today = new Date().toDateString();
+                        if (gameState.lastStudyDate !== today) {
+                            gameState.daysStreak++;
+                            gameState.lastStudyDate = today;
+                        }
+                        
+                        saveGameState();
+                        updateStats();
+                        displayCharacterList();
+                        
+                        setTimeout(() => {
+                            if (currentIndex < filteredCharacters.length - 1) {
+                                loadCharacter(currentIndex + 1);
+                            }
+                        }, 2000);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
