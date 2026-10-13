@@ -1,0 +1,122 @@
+[
+  {
+    "character": "一",
+    "pinyin": "yī",
+    "meaning": "один",
+    "level": 1
+  },
+  {
+    "character": "二",
+    "pinyin": "èr",
+    "meaning": "два",
+    "level": 1
+  },
+  {
+    "character": "三",
+    "pinyin": "sān",
+    "meaning": "три",
+    "level": 1
+  },
+  {
+    "character": "四",
+    "pinyin": "sì",
+    "meaning": "четыре",
+    "level": 1
+  },
+  {
+    "character": "五",
+    "pinyin": "wǔ",
+    "meaning": "пять",
+    "level": 1
+  },
+  {
+    "character": "六",
+    "pinyin": "liù",
+    "meaning": "шесть",
+    "level": 1
+  },
+  {
+    "character": "七",
+    "pinyin": "qī",
+    "meaning": "семь",
+    "level": 1
+  },
+  {
+    "character": "八",
+    "pinyin": "bā",
+    "meaning": "восемь",
+    "level": 1
+  },
+  {
+    "character": "九",
+    "pinyin": "jiǔ",
+    "meaning": "девять",
+    "level": 1
+  },
+  {
+    "character": "十",
+    "pinyin": "shí",
+    "meaning": "десять",
+    "level": 1
+  },
+  {
+    "character": "人",
+    "pinyin": "rén",
+    "meaning": "человек",
+    "level": 1
+  },
+  {
+    "character": "大",
+    "pinyin": "dà",
+    "meaning": "большой",
+    "level": 1
+  },
+  {
+    "character": "小",
+    "pinyin": "xiǎo",
+    "meaning": "маленький",
+    "level": 1
+  },
+  {
+    "character": "中",
+    "pinyin": "zhōng",
+    "meaning": "середина, Китай",
+    "level": 1
+  },
+  {
+    "character": "国",
+    "pinyin": "guó",
+    "meaning": "страна",
+    "level": 1
+  },
+  {
+    "character": "学",
+    "pinyin": "xué",
+    "meaning": "учиться",
+    "level": 1
+  },
+  {
+    "character": "生",
+    "pinyin": "shēng",
+    "meaning": "жизнь, студент",
+    "level": 1
+  },
+  {
+    "character": "老",
+    "pinyin": "lǎo",
+    "meaning": "старый",
+    "level": 1
+  },
+  {
+    "character": "师",
+    "pinyin": "shī",
+    "meaning": "учитель",
+    "level": 1
+  },
+  {
+    "character": "好",
+    "pinyin": "hǎo",
+    "meaning": "хороший",
+    "level": 1
+  }
+]
