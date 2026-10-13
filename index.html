@@ -6,17 +6,56 @@
     <title>Учим иероглифы HSK</title>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             background: #f5f5f5;
             margin: 0;
             touch-action: manipulation;
         }
-        h1 { color: #d32f2f; font-size: 28px; }
+        h1 { color: #d32f2f; font-size: 24px; margin: 10px 0; }
+        
+        /* Панель статистики */
+        #stats {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px auto;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #d32f2f; }
+        .stat-label { font-size: 12px; color: #666; }
+        
+        /* Прогресс-бар */
+        #progress-bar-container {
+            max-width: 400px;
+            margin: 10px auto;
+            background: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+        }
+        #progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #d32f2f, #ff5252);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #progress-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Поле рисования */
         #character-target {
-            margin: 20px auto;
+            margin: 15px auto;
             width: 300px;
             height: 300px;
             background: white;
@@ -26,10 +65,29 @@
             -webkit-user-select: none;
             user-select: none;
         }
+        
+        /* Мнемоника */
+        #mnemonic {
+            background: #fff9c4;
+            border-left: 4px solid #fbc02d;
+            padding: 12px;
+            margin: 15px auto;
+            max-width: 400px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        #mnemonic-icon { font-size: 32px; text-align: center; }
+        #mnemonic-text { font-size: 14px; color: #333; margin-top: 8px; }
+        
+        /* Информация об иероглифе */
+        #info { margin: 15px 0; font-size: 16px; }
+        #info span { color: #d32f2f; font-weight: bold; }
+        
+        /* Кнопки */
         button {
-            padding: 12px 24px;
+            padding: 12px 20px;
             margin: 5px;
-            font-size: 16px;
+            font-size: 15px;
             background: #d32f2f;
             color: white;
             border: none;
@@ -38,96 +96,237 @@
             touch-action: manipulation;
         }
         button:active { background: #b71c1c; }
-        #info {
-            margin-top: 20px;
-            font-size: 18px;
+        button:disabled { background: #ccc; }
+        
+        /* Подсказка */
+        #quiz-hint {
+            margin: 10px 0;
+            font-size: 14px;
+            font-style: italic;
+            min-height: 20px;
         }
-        #info span { color: #d32f2f; font-weight: bold; }
+        
+        /* Список иероглифов */
         #char-list {
             margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
         }
         .char-btn {
-            padding: 12px;
-            font-size: 20px;
-            min-width: 50px;
+            padding: 8px;
+            font-size: 18px;
+            min-width: 40px;
             background: #fff;
             color: #333;
             border: 2px solid #d32f2f;
+            border-radius: 5px;
         }
-        .char-btn.active {
-            background: #d32f2f;
-            color: white;
-        }
-        #progress {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
-        }
-        #quiz-hint {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
-            font-style: italic;
+        .char-btn.active { background: #d32f2f; color: white; }
+        .char-btn.learned { background: #c8e6c9; border-color: #4caf50; }
+        
+        /* Уведомление о бонусе */
+        #bonus-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffd54f;
+            color: #333;
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
     <h1>🀄 Учим иероглифы HSK</h1>
+    
+    <!-- Статистика -->
+    <div id="stats">
+        <div class="stat-item">
+            <div class="stat-value" id="score">0</div>
+            <div class="stat-label">⭐ Очки</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="streak">0</div>
+            <div class="stat-label">🔥 Серия</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="days">0</div>
+            <div class="stat-label">📅 Дней</div>
+        </div>
+    </div>
+    
+    <!-- Прогресс -->
+    <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+    </div>
+    <div id="progress-text">Пройдено: <span id="learned-count">0</span> из <span id="total-count">50</span></div>
+    
+    <!-- Поле рисования -->
     <div id="character-target"></div>
     <div id="quiz-hint">Нажми "✏️ Проверить" чтобы начать рисование</div>
+    
+    <!-- Информация -->
     <div id="info">
         <p><b>Иероглиф:</b> <span id="char">-</span></p>
         <p><b>Пиньинь:</b> <span id="pinyin">-</span></p>
         <p><b>Перевод:</b> <span id="meaning">-</span></p>
     </div>
-    <div id="progress">Иероглиф <span id="current-num">1</span> из <span id="total-num">20</span></div>
+    
+    <!-- Мнемоника -->
+    <div id="mnemonic">
+        <div id="mnemonic-icon"></div>
+        <div id="mnemonic-text">Загрузка...</div>
+    </div>
+    
+    <!-- Кнопки -->
     <button onclick="animateCharacter()">▶ Анимация</button>
     <button onclick="quizCharacter()">✏️ Проверить</button>
     <button onclick="nextCharacter()">➡️ Следующий</button>
     
+    <!-- Список иероглифов -->
     <div id="char-list"></div>
+    
+    <!-- Всплывающее уведомление о бонусе -->
+    <div id="bonus-popup"></div>
 
     <script>
+        // === БАЗА ДАННЫХ ИЕРОГЛИФОВ (50 штук HSK 1) ===
         const characters = [
-            { "character": "一", "pinyin": "yī", "meaning": "один" },
-            { "character": "二", "pinyin": "èr", "meaning": "два" },
-            { "character": "三", "pinyin": "sān", "meaning": "три" },
-            { "character": "四", "pinyin": "sì", "meaning": "четыре" },
-            { "character": "五", "pinyin": "wǔ", "meaning": "пять" },
-            { "character": "六", "pinyin": "liù", "meaning": "шесть" },
-            { "character": "七", "pinyin": "qī", "meaning": "семь" },
-            { "character": "八", "pinyin": "bā", "meaning": "восемь" },
-            { "character": "九", "pinyin": "jiǔ", "meaning": "девять" },
-            { "character": "十", "pinyin": "shí", "meaning": "десять" },
-            { "character": "人", "pinyin": "rén", "meaning": "человек" },
-            { "character": "大", "pinyin": "dà", "meaning": "большой" },
-            { "character": "小", "pinyin": "xiǎo", "meaning": "маленький" },
-            { "character": "中", "pinyin": "zhōng", "meaning": "середина, Китай" },
-            { "character": "国", "pinyin": "guó", "meaning": "страна" },
-            { "character": "学", "pinyin": "xué", "meaning": "учиться" },
-            { "character": "生", "pinyin": "shēng", "meaning": "жизнь, студент" },
-            { "character": "老", "pinyin": "lǎo", "meaning": "старый" },
-            { "character": "师", "pinyin": "shī", "meaning": "учитель" },
-            { "character": "好", "pinyin": "hǎo", "meaning": "хороший" }
+            { "character": "一", "pinyin": "yī", "meaning": "один", "icon": "📏", "mnemonic": "Одна горизонтальная черта — как палка-единичка" },
+            { "character": "二", "pinyin": "èr", "meaning": "два", "icon": "✌️", "mnemonic": "Две палочки — как два пальца" },
+            { "character": "三", "pinyin": "sān", "meaning": "три", "icon": "☰", "mnemonic": "Три палочки — как три ступеньки" },
+            { "character": "四", "pinyin": "sì", "meaning": "четыре", "icon": "", "mnemonic": "Коробочка с ножками внутри — как четыре стены комнаты" },
+            { "character": "五", "pinyin": "wǔ", "meaning": "пять", "icon": "🖐️", "mnemonic": "Похоже на песочные часы — пять пальцев на руке" },
+            { "character": "六", "pinyin": "liù", "meaning": "шесть", "icon": "🏠", "mnemonic": "Крыша дома с двумя точками — шесть окон" },
+            { "character": "七", "pinyin": "qī", "meaning": "семь", "icon": "️", "mnemonic": "Похоже на ножницы — семь раз отмерь" },
+            { "character": "八", "pinyin": "bā", "meaning": "восемь", "icon": "🕷️", "mnemonic": "Две ножки, расходящиеся в стороны — как у паука (8 лап)" },
+            { "character": "九", "pinyin": "jiǔ", "meaning": "девять", "icon": "", "mnemonic": "Изогнутая линия — как горка, девять скатываний" },
+            { "character": "十", "pinyin": "shí", "meaning": "десять", "icon": "➕", "mnemonic": "Плюс — крест из двух палочек, идеальная десятка" },
+            { "character": "人", "pinyin": "rén", "meaning": "человек", "icon": "🚶", "mnemonic": "Две ножки идут — это человек в движении" },
+            { "character": "大", "pinyin": "dà", "meaning": "большой", "icon": "", "mnemonic": "Человек (人) раскинул руки в стороны — большой!" },
+            { "character": "小", "pinyin": "xiǎo", "meaning": "маленький", "icon": "", "mnemonic": "Центральная палочка с двумя маленькими штрихами по бокам — кроха" },
+            { "character": "中", "pinyin": "zhōng", "meaning": "середина, Китай", "icon": "🎯", "mnemonic": "Прямоугольник с палкой посередине — стрела в цель, центр" },
+            { "character": "国", "pinyin": "guó", "meaning": "страна", "icon": "🏯", "mnemonic": "Большая коробка (границы страны) с нефритом (сокровищем) внутри" },
+            { "character": "学", "pinyin": "xué", "meaning": "учиться", "icon": "📚", "mnemonic": "Наверху три штриха (знания), внизу ребенок (子) — ребенок учится" },
+            { "character": "生", "pinyin": "shēng", "meaning": "жизнь, рождаться", "icon": "🌱", "mnemonic": "Росток пробивается сквозь землю — жизнь начинается" },
+            { "character": "老", "pinyin": "lǎo", "meaning": "старый", "icon": "👴", "mnemonic": "Человек сгорбился, опираясь на палку — старик" },
+            { "character": "师", "pinyin": "shī", "meaning": "учитель", "icon": "‍🏫", "mnemonic": "Мастер, который ведет за руку (левая часть) — наставник" },
+            { "character": "好", "pinyin": "hǎo", "meaning": "хороший", "icon": "👍", "mnemonic": "Женщина (女) + ребенок (子) = хорошо, гармония в семье" },
+            { "character": "男", "pinyin": "nán", "meaning": "мужчина", "icon": "👨", "mnemonic": "Поле (田) + сила (力) = мужчина работает в поле" },
+            { "character": "女", "pinyin": "nǚ", "meaning": "женщина", "icon": "👩", "mnemonic": "Женщина сидит, скрестив руки — изящная поза" },
+            { "character": "子", "pinyin": "zǐ", "meaning": "ребенок, сын", "icon": "", "mnemonic": "Малыш с вытянутыми ручками — ребенок" },
+            { "character": "日", "pinyin": "rì", "meaning": "день, солнце", "icon": "☀️", "mnemonic": "Прямоугольник с чертой посередине — солнце на небе" },
+            { "character": "月", "pinyin": "yuè", "meaning": "месяц, луна", "icon": "🌙", "mnemonic": "Изогнутая форма с двумя чертами — серп луны" },
+            { "character": "年", "pinyin": "nián", "meaning": "год", "icon": "📅", "mnemonic": "Колос зерна — урожай собирают раз в год" },
+            { "character": "天", "pinyin": "tiān", "meaning": "небо, день", "icon": "🌤️", "mnemonic": "Большой (大) человек с чертой над головой — над ним только небо" },
+            { "character": "地", "pinyin": "dì", "meaning": "земля", "icon": "🌍", "mnemonic": "Земля (土) + тоже (也) — земля, по которой ходим" },
+            { "character": "水", "pinyin": "shuǐ", "meaning": "вода", "icon": "💧", "mnemonic": "Центральный поток с брызгами по бокам — текущая вода" },
+            { "character": "火", "pinyin": "hu", "meaning": "огонь", "icon": "🔥", "mnemonic": "Языки пламени вздымаются вверх — костер" },
+            { "character": "山", "pinyin": "shān", "meaning": "гора", "icon": "️", "mnemonic": "Три пика — центральная гора выше боковых" },
+            { "character": "木", "pinyin": "mù", "meaning": "дерево", "icon": "", "mnemonic": "Ствол с ветками вверху и корнями внизу — дерево" },
+            { "character": "口", "pinyin": "kǒu", "meaning": "рот", "icon": "👄", "mnemonic": "Квадратик — открытый рот" },
+            { "character": "目", "pinyin": "mù", "meaning": "глаз", "icon": "👁️", "mnemonic": "Глаз с зрачком внутри — прямоугольник с чертами" },
+            { "character": "耳", "pinyin": "ěr", "meaning": "ухо", "icon": "👂", "mnemonic": "Ушная раковина с завитками внутри" },
+            { "character": "手", "pinyin": "shǒu", "meaning": "рука", "icon": "✋", "mnemonic": "Ладонь с пальцами — рука" },
+            { "character": "足", "pinyin": "zú", "meaning": "нога, стопа", "icon": "", "mnemonic": "Рот (口) над ножкой — стопа, на которую наступаем" },
+            { "character": "心", "pinyin": "xīn", "meaning": "сердце, душа", "icon": "❤️", "mnemonic": "Три точки и изгиб — сердце с каплями крови" },
+            { "character": "力", "pinyin": "lì", "meaning": "сила", "icon": "💪", "mnemonic": "Изогнутая рука, напрягающая мышцу — сила" },
+            { "character": "刀", "pinyin": "dāo", "meaning": "нож", "icon": "🔪", "mnemonic": "Изогнутое лезвие с рукояткой — нож" },
+            { "character": "门", "pinyin": "mén", "meaning": "дверь", "icon": "", "mnemonic": "Две стойки и перекладина — дверной проем" },
+            { "character": "马", "pinyin": "mǎ", "meaning": "лошадь", "icon": "🐴", "mnemonic": "Грива, голова и четыре ноги (упрощенно) — лошадь скачет" },
+            { "character": "鱼", "pinyin": "yú", "meaning": "рыба", "icon": "🐟", "mnemonic": "Голова, тело и хвост рыбы — плывет" },
+            { "character": "鸟", "pinyin": "niǎo", "meaning": "птица", "icon": "🐦", "mnemonic": "Голова с глазом, тело и хвост — птица сидит" },
+            { "character": "牛", "pinyin": "niú", "meaning": "корова", "icon": "🐄", "mnemonic": "Голова с рогами — морда коровы" },
+            { "character": "羊", "pinyin": "yáng", "meaning": "овца", "icon": "🐑", "mnemonic": "Рога барана закручены — овца" },
+            { "character": "车", "pinyin": "chē", "meaning": "машина, повозка", "icon": "🚗", "mnemonic": "Вид на телегу сверху — два колеса и ось" },
+            { "character": "书", "pinyin": "shū", "meaning": "книга", "icon": "📖", "mnemonic": "Свиток с кисточкой — книга, письмо" },
+            { "character": "电", "pinyin": "diàn", "meaning": "электричество", "icon": "⚡", "mnemonic": "Молния, бьющая из облака (упрощенно) — электричество" },
+            { "character": "话", "pinyin": "huà", "meaning": "речь, разговор", "icon": "💬", "mnemonic": "Речь () + язык (舌) = слова, которые говорим" }
         ];
 
+        // === СОСТОЯНИЕ ПРИЛОЖЕНИЯ ===
         let writer;
         let currentIndex = 0;
         let isQuizMode = false;
+        let currentStreak = 0; // текущая серия правильных ответов
 
+        // === ЗАГРУЗКА СОХРАНЕННОГО ПРОГРЕССА ===
+        let gameState = {
+            score: 0,
+            daysStreak: 0,
+            lastStudyDate: null,
+            learned: {} // { "一": true, "二": true, ... }
+        };
+
+        function loadGameState() {
+            const saved = localStorage.getItem('hanziGameState');
+            if (saved) {
+                gameState = JSON.parse(saved);
+            }
+            // Проверяем стрик дней
+            const today = new Date().toDateString();
+            if (gameState.lastStudyDate) {
+                const lastDate = new Date(gameState.lastStudyDate);
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (gameState.lastStudyDate !== today) {
+                    if (lastDate.toDateString() === yesterday.toDateString()) {
+                        // Вчера занимался — стрик продолжается
+                    } else if (lastDate.toDateString() !== today) {
+                        // Пропустил день — стрик сбрасывается
+                        gameState.daysStreak = 0;
+                    }
+                }
+            }
+            updateStats();
+        }
+
+        function saveGameState() {
+            localStorage.setItem('hanziGameState', JSON.stringify(gameState));
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak').textContent = currentStreak;
+            document.getElementById('days').textContent = gameState.daysStreak;
+            
+            const learnedCount = Object.keys(gameState.learned).length;
+            document.getElementById('learned-count').textContent = learnedCount;
+            document.getElementById('total-count').textContent = characters.length;
+            
+            const progress = (learnedCount / characters.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function showBonusPopup(text) {
+            const popup = document.getElementById('bonus-popup');
+            popup.textContent = text;
+            popup.style.display = 'block';
+            setTimeout(() => { popup.style.display = 'none'; }, 1500);
+        }
+
+        // === ОСНОВНЫЕ ФУНКЦИИ ===
         function displayCharacterList() {
             const list = document.getElementById('char-list');
             list.innerHTML = '';
             characters.forEach((char, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'char-btn' + (index === currentIndex ? ' active' : '');
+                let className = 'char-btn';
+                if (index === currentIndex) className += ' active';
+                if (gameState.learned[char.character]) className += ' learned';
+                btn.className = className;
                 btn.textContent = char.character;
                 btn.onclick = () => loadCharacter(index);
                 list.appendChild(btn);
@@ -143,9 +342,12 @@
             document.getElementById('char').textContent = char.character;
             document.getElementById('pinyin').textContent = char.pinyin;
             document.getElementById('meaning').textContent = char.meaning;
-            document.getElementById('current-num').textContent = index + 1;
-            document.getElementById('total-num').textContent = characters.length;
             document.getElementById('quiz-hint').textContent = 'Нажми "✏️ Проверить" чтобы начать рисование';
+            document.getElementById('quiz-hint').style.color = '#666';
+            
+            // Мнемоника
+            document.getElementById('mnemonic-icon').textContent = char.icon;
+            document.getElementById('mnemonic-text').textContent = char.mnemonic;
             
             displayCharacterList();
             
@@ -169,6 +371,7 @@
             if (writer) {
                 isQuizMode = false;
                 document.getElementById('quiz-hint').textContent = 'Смотри анимацию...';
+                document.getElementById('quiz-hint').style.color = '#666';
                 writer.animateCharacter();
             }
         }
@@ -177,12 +380,14 @@
             if (writer) {
                 isQuizMode = true;
                 document.getElementById('quiz-hint').textContent = '✏️ Рисуй пальцем в квадрате!';
+                document.getElementById('quiz-hint').style.color = '#1976d2';
+                
                 writer.quiz({
                     showOutline: true,
                     showHintAfterMisses: 2,
                     highlightOnComplete: true,
                     onCorrectStroke: function(strokeData) {
-                        document.getElementById('quiz-hint').textContent = '✓ Правильно! Продолжай...';
+                        document.getElementById('quiz-hint').textContent = '✓ Правильная черта!';
                         document.getElementById('quiz-hint').style.color = '#4caf50';
                     },
                     onMistake: function(strokeData) {
@@ -192,12 +397,48 @@
                     onComplete: function(summaryData) {
                         document.getElementById('quiz-hint').textContent = '🎉 Отлично! Иероглиф написан правильно!';
                         document.getElementById('quiz-hint').style.color = '#4caf50';
-                        alert('Отлично! Иероглиф написан правильно! 🎉');
+                        
+                        // === НАЧИСЛЕНИЕ ОЧКОВ ===
+                        const char = characters[currentIndex];
+                        const isFirstTime = !gameState.learned[char.character];
+                        
+                        // +10 за правильный ответ
+                        gameState.score += 10;
+                        currentStreak++;
+                        
+                        // +5 бонус за каждые 3 правильных подряд
+                        if (currentStreak > 0 && currentStreak % 3 === 0) {
+                            gameState.score += 5;
+                            showBonusPopup('🔥 БОНУС +5 за серию ' + currentStreak + '!');
+                        }
+                        
+                        // Отмечаем как изученный
+                        gameState.learned[char.character] = true;
+                        
+                        // Обновляем стрик дней
+                        const today = new Date().toDateString();
+                        if (gameState.lastStudyDate !== today) {
+                            gameState.daysStreak++;
+                            gameState.lastStudyDate = today;
+                        }
+                        
+                        saveGameState();
+                        updateStats();
+                        displayCharacterList();
+                        
+                        // Автопереход через 2 секунды
+                        setTimeout(() => {
+                            if (currentIndex < characters.length - 1) {
+                                nextCharacter();
+                            }
+                        }, 2000);
                     }
                 });
             }
         }
 
+        // === ЗАПУСК ===
+        loadGameState();
         loadCharacter(0);
     </script>
 </body>
